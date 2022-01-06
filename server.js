@@ -9,44 +9,17 @@ const app = new Koa();
 app.use(cors());
 app.use(koaBody({json: true}));
 
-const port = 8081;
+const port = process.env.PORT || 8088;
 const router = new Router();
+
+router.get('/index', async (ctx) => {
+    ctx.response.body = 'hello';
+  });
+
+
 app.use(router.routes()).use(router.allowedMethods());
 const server = http.createServer(app.callback());
-const wsServer = new WS.Server({server});
-
-const users = ['exist1', 'exist2'];
-
-router.get('/test', async (ctx, next) => {
-    ctx.response.body = {
-        status: "ok",
-        timestamp: Date.now(),
-    };
-});
-router.post('/check', async (ctx, next) => {
-    const { userName } = ctx.request.body
-    console.log(ctx.request)
-    if (users.includes(userName)) {
-        ctx.response.body = {
-            access: false,
-            errorMessage: "Такой пользователь уже существует",
-        };
-    } else {
-        users.push(userName)
-        ctx.response.body = {
-            access: true,
-            userName,
-        };
-    }
-});
-router.post('/exit', async(ctx, next) => {
-    const { userName } = ctx.request.body
-    const index = users.findIndex(o => o === userName);
-    if (index !== -1) {
-        users.splice(index, 1);
-    }
-    ctx.response.status = 204;
-});
+const wsServer = new WS.Server({ server });
 
 wsServer.on('connection', (ws, req) => {
     ws.on('message', msg => {
@@ -54,8 +27,8 @@ wsServer.on('connection', (ws, req) => {
             .filter(c => c.readyState === WS.OPEN)
             .forEach(c => c.send('to all', msg))
     });
-    ws.send('welcome', errCallback);
+    ws.send('welcome');
 });
 
 
-server.listen(port, () => console.log('server started'));
+server.listen(port);
