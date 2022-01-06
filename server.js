@@ -7,48 +7,44 @@ const WS = require('ws');
 
 const app = new Koa();
 app.use(cors());
-app.use(koaBody(
-    { json: true }
-));
+app.use(koaBody({json: true}));
 
 const port = 8080;
 const router = new Router();
 app.use(router.routes()).use(router.allowedMethods());
 const server = http.createServer(app.callback());
-const wsServer = new WS.Server({ server });
+const wsServer = new WS.Server({server});
 
-const users =  ['user1', 'user2'];
+const users = ['exist1', 'exist2'];
 
 router.get('/test', async (ctx, next) => {
     ctx.response.body = {
-        status: 'ok',
+        status: "ok",
         timestamp: Date.now(),
     };
 });
-
 router.post('/check', async (ctx, next) => {
-    const { userName } = ctx.response.body;
-    console.log(ctx.request);
+    const { userName } = ctx.request.body
+    console.log(ctx.request)
     if (users.includes(userName)) {
         ctx.response.body = {
             access: false,
-            errorMessage: 'Such username already exists',
+            errorMessage: "Такой пользователь уже существует",
         };
     } else {
-        users.push(userName);
+        users.push(userName)
         ctx.response.body = {
             access: true,
             userName,
         };
     }
 });
-
-router.post('/exit', async (ctx, next) => {
-    const { userName } = ctx.response.body;
-    const index = users.findIndex(elem => elem === userName);
+router.post('/exit', async(ctx, next) => {
+    const { userName } = ctx.request.body
+    const index = users.findIndex(o => o === userName);
     if (index !== -1) {
         users.splice(index, 1);
-    } 
+    }
     ctx.response.status = 204;
 });
 
@@ -60,5 +56,6 @@ wsServer.on('connection', (ws, req) => {
     });
     ws.send('welcome', errCallback);
 });
+
 
 server.listen(port, () => console.log('server started'));
