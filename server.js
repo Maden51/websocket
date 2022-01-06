@@ -9,7 +9,7 @@ const app = new Koa();
 app.use(cors());
 app.use(koaBody({json: true}));
 
-const port = process.env.PORT || 8088;
+const port = process.env.PORT || 8080;
 const router = new Router();
 
 router.get('/index', async (ctx) => {
