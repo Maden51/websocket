@@ -25,7 +25,7 @@ wsServer.on('connection', (ws, req) => {
     ws.on('message', msg => {
         [...wsServer.clients]
             .filter(c => c.readyState === WS.OPEN)
-            .forEach(c => c.send('to all', msg))
+            .forEach(c => c.send('some message', msg))
     });
     ws.send('welcome');
 });
